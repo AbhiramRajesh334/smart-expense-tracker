@@ -15,8 +15,13 @@ const authMiddleware = (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    const resolvedUserId = decoded?.id || decoded?.userId || decoded?._id;
+    if (!resolvedUserId) {
+      return res.status(401).json({ message: 'Not authorized, invalid token payload' });
+    }
+
     // Attach decoded user info to the request
-    req.user = { id: decoded.id };
+    req.user = { id: String(resolvedUserId) };
 
     // Move to the next middleware or controller
     next();

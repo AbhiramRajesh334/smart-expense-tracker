@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 
 const authRoutes = require("./routes/authRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 
 const app = express();
 
@@ -21,6 +22,7 @@ const startServer = async () => {
         // Initialize Routes
         app.use("/api/auth", authRoutes);
         app.use("/api/expenses", expenseRoutes);
+        app.use("/api/ai", aiRoutes);
 
         app.get("/", (req, res) => {
             res.send("API is running");

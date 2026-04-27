@@ -9,17 +9,21 @@ const Dashboard = () => {
   const [category, setCategory] = useState('');
   const [date, setDate] = useState('');
   const [note, setNote] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState(null);
   
   const [isFetching, setIsFetching] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchExpenses = async () => {
+    setError(null);
     setIsFetching(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(API_URL, {
+      if (!token) {
+        throw new Error('Please login again to load expenses.');
+      }
+
+      const response = await fetch('http://localhost:5000/api/expenses', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -27,10 +31,16 @@ const Dashboard = () => {
       
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Failed to fetch expenses');
-      
-      setExpenses(data);
+
+      const normalizedExpenses = Array.isArray(data)
+        ? data
+        : Array.isArray(data.expenses)
+          ? data.expenses
+          : [];
+      setExpenses(normalizedExpenses);
     } catch (err) {
       setError(err.message);
+      setExpenses([]);
     } finally {
       setIsFetching(false);
     }
@@ -117,9 +127,8 @@ const Dashboard = () => {
 
   const lastExpense = expenses.length > 0 ? expenses[0] : null;
 
-  const filteredExpenses = expenses.filter(exp => 
-    exp.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (exp.note && exp.note.toLowerCase().includes(searchQuery.toLowerCase()))
+  const sortedExpenses = [...expenses].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
   const getCategoryBadgeClass = (cat) => {
@@ -241,19 +250,12 @@ const Dashboard = () => {
         <div className="card">
           <div className="card-header">
             <h3><span>⊜</span> Your Expenses</h3>
-            <input 
-              type="text" 
-              className="search-input" 
-              placeholder="🔍 Search expenses..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
           </div>
           
           <div className="table-container">
             {isFetching ? (
               <p style={{ padding: '20px', color: 'var(--text-secondary)' }}>Loading expenses...</p>
-            ) : filteredExpenses.length === 0 ? (
+            ) : sortedExpenses.length === 0 ? (
               <p style={{ padding: '20px', color: 'var(--text-secondary)' }}>No expenses found.</p>
             ) : (
               <table>
@@ -267,7 +269,7 @@ const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredExpenses.map((expense) => (
+                  {sortedExpenses.map((expense) => (
                     <tr key={expense._id}>
                       <td>{new Date(expense.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                       <td>
