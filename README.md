@@ -18,7 +18,10 @@ SpendWise helps you take control of your finances by providing an intuitive plat
   - **Daily Insights**: Bar charts displaying today's spending breakdown.
   - **Weekly Trends**: Line charts tracking your daily spending habits across every week of the current month.
   - **Monthly Comparisons**: Historical bar charts comparing your total expenses over the last 3 months.
-- **AI Insights (Upcoming)**: A dedicated section for intelligent financial recommendations.
+- **Natural Language Query (NLQ) Assistant**:
+  - Ask questions like `food expenses today`, `travel last week`, `auto expenses yesterday`.
+  - Uses OpenRouter to parse intent (`category`, `keyword`, `timeRange`) and applies robust backend filtering.
+  - Returns smart totals directly in the Insights page.
 
 ## 🛠 Tech Stack
 
@@ -33,6 +36,7 @@ SpendWise helps you take control of your finances by providing an intuitive plat
 - Express.js
 - JSON Web Token (JWT)
 - bcryptjs (Password hashing)
+- OpenRouter Chat Completions API (NLQ intent parsing)
 
 **Database:**
 - MongoDB
@@ -98,6 +102,7 @@ Create a `.env` file inside the `/server` directory with the following variables
 PORT=5000
 MONGO_URI=your_mongodb_connection_string_here
 JWT_SECRET=your_super_secret_jwt_key
+OPENROUTER_API_KEY=your_openrouter_api_key
 ```
 
 ## 📡 API Endpoints
@@ -111,8 +116,8 @@ JWT_SECRET=your_super_secret_jwt_key
 - `POST /api/expenses` - Add a new expense
 - `DELETE /api/expenses/:id` - Delete an expense
 
-### AI Insights (Upcoming)
-- `GET /api/insights` - Generate personalized financial tips
+### AI Query (Protected Route - Requires JWT)
+- `POST /api/ai/query` - Parse natural-language expense query and return total spend summary
 
 ## 📸 Screenshots
 
@@ -122,9 +127,15 @@ JWT_SECRET=your_super_secret_jwt_key
 | :---: | :---: |
 | ![Dashboard Placeholder](https://via.placeholder.com/600x350?text=Dashboard+UI) | ![Analytics Placeholder](https://via.placeholder.com/600x350?text=Analytics+Charts) |
 
+## 🤖 NLQ Notes
+
+- AI is used only to extract query intent (`category`, `keyword`, `timeRange`).
+- Final filtering and total calculation are handled in backend logic for consistency.
+- Dashboard expense list renders all fetched expenses (no implicit date-only filtering).
+
 ## 🔮 Future Improvements
 
-- **AI Insights**: Integrate OpenAI/Gemini to provide smart financial recommendations based on spending history.
+- **AI Enhancements**: Add richer NLQ templates, better phrase handling, and confidence-based fallbacks.
 - **Smart Search & Filtering**: Advanced multi-parameter search (date ranges, precise category filtering).
 - **Budget Alerts**: Set monthly budget limits per category and receive visual warnings.
 - **Export to CSV/PDF**: Allow users to download their expense reports.
